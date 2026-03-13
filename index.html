@@ -3,14 +3,15 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Salary Tracker</title>
+    <title>SALARY TRACKER</title>
     <link rel="manifest" href="manifest.json" />
     <link rel="apple-touch-icon" href="clock.png" />
+    <link rel="icon" type="image/png" href="clock.png" />
     <meta name="theme-color" content="#1a1a2e" />
 
     <style>
       :root {
-        --primary-color: #00ff88;
+        --primary-color: #00d1a0;
         --bg-color: #1a1a2e;
         --card-bg: #16213e;
         --text-color: #e9ecef;
@@ -20,6 +21,9 @@
         font-family:
           'Inter',
           -apple-system,
+          BlinkMacSystemFont,
+          'Segoe UI',
+          Roboto,
           sans-serif;
         background-color: var(--bg-color);
         color: var(--text-color);
@@ -29,6 +33,7 @@
         min-height: 100vh;
         margin: 0;
         overflow: hidden;
+        text-transform: uppercase;
       }
 
       .svg-container {
@@ -38,14 +43,14 @@
         width: 100%;
         height: 100%;
         z-index: -1;
-        opacity: 0.5;
+        opacity: 0.35;
         overflow: hidden;
         border-radius: 20px;
       }
 
       .wave-path {
         will-change: transform;
-        animation: wave-animation 10s infinite linear;
+        animation: wave-animation 12s infinite linear;
       }
 
       @keyframes wave-animation {
@@ -62,80 +67,131 @@
         background: var(--card-bg);
         padding: 2.5rem;
         border-radius: 20px;
-        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+        box-shadow: 0 10px 50px rgba(0, 0, 0, 0.6);
         text-align: center;
         width: 90%;
         max-width: 420px;
         z-index: 10;
-        border: 1px solid rgba(255, 255, 255, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.05);
         overflow: hidden;
       }
 
       h1 {
-        font-size: 1.2rem;
+        font-size: 1.1rem;
         margin-bottom: 1.5rem;
-        letter-spacing: 2px;
-        opacity: 0.8;
+        letter-spacing: 4px;
+        opacity: 0.7;
+        margin-top: 0;
       }
+
       .input-group {
         display: grid;
         grid-template-columns: 1fr 1fr;
         gap: 12px;
         margin-bottom: 1.5rem;
       }
+
       .input-box {
         display: flex;
         flex-direction: column;
         text-align: left;
       }
+
       label {
-        font-size: 0.75rem;
+        font-size: 0.7rem;
         margin-bottom: 5px;
-        color: #888;
+        color: #6a6a8a;
+        letter-spacing: 1px;
       }
+
       input {
-        background: #0f3460;
-        border: 1px solid #533483;
-        color: white;
+        background: #0f172a;
+        border: 1px solid #334155;
+        color: #cbd5e1;
         padding: 10px;
         border-radius: 8px;
         outline: none;
-        font-size: 1rem;
+        font-size: 0.95rem;
+        font-family: inherit;
+        text-align: center;
       }
+
+      input[type='time'] {
+        cursor: pointer;
+      }
+
+      input[type='time']::-webkit-calendar-picker-indicator {
+        cursor: pointer;
+      }
+
+      input[type='number'] {
+        appearance: none;
+        -moz-appearance: textfield;
+        background-image:
+          url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='18 15 12 9 6 15'%3e%3c/polyline%3e%3c/svg%3e"),
+          url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+        background-repeat: no-repeat;
+        background-position:
+          right 8px top 6px,
+          right 8px bottom 6px;
+        background-size: 10px;
+        padding-right: 30px;
+        cursor: pointer;
+      }
+
+      input[type='number']::-webkit-inner-spin-button,
+      input[type='number']::-webkit-outer-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+      }
+
       .salary-display {
-        margin: 25px 0;
+        margin: 30px 0;
       }
+
       .salary-label {
-        font-size: 0.85rem;
+        font-size: 0.8rem;
         color: var(--primary-color);
         margin-bottom: 10px;
+        letter-spacing: 2px;
+        opacity: 0.8;
       }
+
       .amount-text {
-        font-family: 'Courier New', monospace;
         font-size: 3.5rem;
-        font-weight: bold;
+        font-weight: 800;
         color: var(--primary-color);
-        text-shadow: 0 0 15px rgba(0, 255, 136, 0.3);
+        text-shadow: 0 0 20px rgba(0, 209, 160, 0.2);
+        font-family: inherit;
+        letter-spacing: -1px;
       }
+
       .countdown-section {
         margin-top: 20px;
         padding-top: 20px;
-        border-top: 1px solid rgba(255, 255, 255, 0.1);
+        border-top: 1px solid rgba(255, 255, 255, 0.05);
       }
+
       .countdown-label {
-        font-size: 0.85rem;
-        color: #ff4757;
+        font-size: 0.75rem;
+        color: #94a3b8;
         margin-bottom: 8px;
+        letter-spacing: 1px;
       }
+
       .countdown-time {
-        font-family: 'Monaco', monospace;
         font-size: 1.8rem;
+        font-weight: 700;
+        font-family: inherit;
+        letter-spacing: 1px;
+        color: #e2e8f0;
       }
+
       #status {
-        font-size: 0.7rem;
-        color: #666;
+        font-size: 0.65rem;
+        color: #475569;
         margin-bottom: 10px;
-        text-transform: uppercase;
+        letter-spacing: 2px;
       }
     </style>
   </head>
@@ -158,7 +214,7 @@
               <stop
                 id="stop1"
                 offset="0%"
-                style="stop-color: #00ff88; stop-opacity: 0.4"
+                style="stop-color: #1e40af; stop-opacity: 0.3"
               />
               <stop
                 id="stop2"
@@ -171,33 +227,37 @@
       </div>
 
       <h1>WORK TRACKER</h1>
+
       <div class="input-group">
         <div class="input-box">
-          <label>Start Time</label
-          ><input type="time" id="startTime" value="08:30" />
+          <label>START TIME</label>
+          <input type="time" id="startTime" value="08:30" />
         </div>
         <div class="input-box">
-          <label>End Time</label
-          ><input type="time" id="endTime" value="17:30" />
+          <label>END TIME</label>
+          <input type="time" id="endTime" value="17:30" />
         </div>
       </div>
+
       <div class="input-box" style="margin-bottom: 20px">
-        <label>Daily Salary</label
-        ><input type="number" id="dailySalary" value="200" />
+        <label>DAILY SALARY</label>
+        <input type="number" id="dailySalary" value="200" step="1" />
       </div>
+
       <div id="status">INITIALIZING...</div>
+
       <div class="salary-display">
         <div class="salary-label">CURRENT EARNINGS</div>
         <div id="amount" class="amount-text">0.000</div>
       </div>
+
       <div class="countdown-section">
         <div class="countdown-label">COUNTDOWN TO FREEDOM</div>
-        <div id="countdown" class="countdown-time">00:00:00</div>
+        <div id="countdown" class="countdown-time">00:00:00:00</div>
       </div>
     </div>
 
     <script>
-      // PWA Service Worker Registration
       if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
           navigator.serviceWorker
@@ -214,20 +274,41 @@
       const endTimeInput = document.getElementById('endTime');
       const dailySalaryInput = document.getElementById('dailySalary');
 
-      let currentHue = 150;
-      let targetHue = 150;
+      let currentHue = 170;
+      let targetHue = 170;
 
-      function formatTime(ms) {
-        if (ms <= 0) return '00:00:00';
-        const totalSeconds = Math.floor(ms / 1000);
-        const h = Math.floor(totalSeconds / 3600)
+      dailySalaryInput.addEventListener('mousedown', function (e) {
+        const rect = this.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+
+        if (x > rect.width - 35) {
+          e.preventDefault();
+          let val = parseFloat(this.value) || 0;
+          if (y < rect.height / 2) {
+            this.value = val + 1;
+          } else {
+            this.value = val - 1;
+          }
+          this.dispatchEvent(new Event('input'));
+        }
+      });
+
+      function formatTimeWithMs(ms) {
+        if (ms <= 0) return '00:00:00:00';
+        const h = Math.floor(ms / 3600000)
           .toString()
           .padStart(2, '0');
-        const m = Math.floor((totalSeconds % 3600) / 60)
+        const m = Math.floor((ms % 3600000) / 60000)
           .toString()
           .padStart(2, '0');
-        const s = (totalSeconds % 60).toString().padStart(2, '0');
-        return `${h}:${m}:${s}`;
+        const s = Math.floor((ms % 60000) / 1000)
+          .toString()
+          .padStart(2, '0');
+        const tens = Math.floor((ms % 1000) / 10)
+          .toString()
+          .padStart(2, '0');
+        return `${h}:${m}:${s}:${tens}`;
       }
 
       function update() {
@@ -241,23 +322,24 @@
           statusEl.innerText = 'BEFORE WORKING HOURS';
           amountEl.innerText = '0.000';
           countdownEl.innerText = 'WAITING...';
-          targetHue = 150;
+          targetHue = 170;
         } else if (now >= end) {
           statusEl.innerText = 'OFF WORK - ENJOY!';
           amountEl.innerText = dailySalary.toFixed(3);
-          countdownEl.innerText = '00:00:00';
-          targetHue = 30;
+          countdownEl.innerText = '00:00:00:00';
+          targetHue = 25;
         } else {
           statusEl.innerText = 'ON DUTY';
           const totalDuration = end - start;
+          const remaining = end - now;
           const ratio = (now - start) / totalDuration;
           amountEl.innerText = (ratio * dailySalary).toFixed(3);
-          countdownEl.innerText = formatTime(end - now);
-          targetHue = 150 - ratio * 120;
+          countdownEl.innerText = formatTimeWithMs(remaining);
+          targetHue = 170 - ratio * 145;
         }
 
-        currentHue += (targetHue - currentHue) * 0.05;
-        stop1.style.stopColor = `hsl(${currentHue}, 100%, 50%)`;
+        currentHue += (targetHue - currentHue) * 0.02;
+        stop1.style.stopColor = `hsl(${currentHue}, 60%, 40%)`;
         requestAnimationFrame(update);
       }
       requestAnimationFrame(update);
