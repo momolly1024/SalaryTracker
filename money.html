@@ -1,0 +1,265 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Salary Tracker</title>
+    <link rel="manifest" href="manifest.json" />
+    <meta name="theme-color" content="#1a1a2e" />
+
+    <style>
+      :root {
+        --primary-color: #00ff88;
+        --bg-color: #1a1a2e;
+        --card-bg: #16213e;
+        --text-color: #e9ecef;
+      }
+
+      body {
+        font-family:
+          'Inter',
+          -apple-system,
+          sans-serif;
+        background-color: var(--bg-color);
+        color: var(--text-color);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+        margin: 0;
+        overflow: hidden;
+      }
+
+      .svg-container {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: -1;
+        opacity: 0.5;
+        overflow: hidden;
+        border-radius: 20px;
+      }
+
+      .wave-path {
+        will-change: transform;
+        animation: wave-animation 10s infinite linear;
+      }
+
+      @keyframes wave-animation {
+        from {
+          transform: translate3d(0, 0, 0);
+        }
+        to {
+          transform: translate3d(-50%, 0, 0);
+        }
+      }
+
+      .container {
+        position: relative;
+        background: var(--card-bg);
+        padding: 2.5rem;
+        border-radius: 20px;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+        text-align: center;
+        width: 90%;
+        max-width: 420px;
+        z-index: 10;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        overflow: hidden;
+      }
+
+      h1 {
+        font-size: 1.2rem;
+        margin-bottom: 1.5rem;
+        letter-spacing: 2px;
+        opacity: 0.8;
+      }
+      .input-group {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+        margin-bottom: 1.5rem;
+      }
+      .input-box {
+        display: flex;
+        flex-direction: column;
+        text-align: left;
+      }
+      label {
+        font-size: 0.75rem;
+        margin-bottom: 5px;
+        color: #888;
+      }
+      input {
+        background: #0f3460;
+        border: 1px solid #533483;
+        color: white;
+        padding: 10px;
+        border-radius: 8px;
+        outline: none;
+        font-size: 1rem;
+      }
+      .salary-display {
+        margin: 25px 0;
+      }
+      .salary-label {
+        font-size: 0.85rem;
+        color: var(--primary-color);
+        margin-bottom: 10px;
+      }
+      .amount-text {
+        font-family: 'Courier New', monospace;
+        font-size: 3.5rem;
+        font-weight: bold;
+        color: var(--primary-color);
+        text-shadow: 0 0 15px rgba(0, 255, 136, 0.3);
+      }
+      .countdown-section {
+        margin-top: 20px;
+        padding-top: 20px;
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
+      }
+      .countdown-label {
+        font-size: 0.85rem;
+        color: #ff4757;
+        margin-bottom: 8px;
+      }
+      .countdown-time {
+        font-family: 'Monaco', monospace;
+        font-size: 1.8rem;
+      }
+      #status {
+        font-size: 0.7rem;
+        color: #666;
+        margin-bottom: 10px;
+        text-transform: uppercase;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="svg-container">
+        <svg
+          viewBox="0 0 800 400"
+          preserveAspectRatio="none"
+          style="width: 200%; height: 100%"
+        >
+          <path
+            id="dynamic-wave"
+            class="wave-path"
+            d="M 0 200 C 100 150, 300 250, 400 200 C 500 150, 700 250, 800 200 L 800 400 L 0 400 Z M 800 200 C 900 150, 1100 250, 1200 200 C 1300 150, 1500 250, 1600 200 L 1600 400 L 800 400 Z"
+            fill="url(#grad)"
+          />
+          <defs>
+            <linearGradient id="grad" x1="0%" y1="0%" x2="0%" y2="100%">
+              <stop
+                id="stop1"
+                offset="0%"
+                style="stop-color: #00ff88; stop-opacity: 0.4"
+              />
+              <stop
+                id="stop2"
+                offset="100%"
+                style="stop-color: #16213e; stop-opacity: 1"
+              />
+            </linearGradient>
+          </defs>
+        </svg>
+      </div>
+
+      <h1>WORK TRACKER</h1>
+      <div class="input-group">
+        <div class="input-box">
+          <label>Start Time</label
+          ><input type="time" id="startTime" value="08:30" />
+        </div>
+        <div class="input-box">
+          <label>End Time</label
+          ><input type="time" id="endTime" value="17:30" />
+        </div>
+      </div>
+      <div class="input-box" style="margin-bottom: 20px">
+        <label>Daily Salary</label
+        ><input type="number" id="dailySalary" value="200" />
+      </div>
+      <div id="status">INITIALIZING...</div>
+      <div class="salary-display">
+        <div class="salary-label">CURRENT EARNINGS</div>
+        <div id="amount" class="amount-text">0.000</div>
+      </div>
+      <div class="countdown-section">
+        <div class="countdown-label">COUNTDOWN TO FREEDOM</div>
+        <div id="countdown" class="countdown-time">00:00:00</div>
+      </div>
+    </div>
+
+    <script>
+      // PWA Service Worker Registration
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker
+            .register('sw.js')
+            .catch((err) => console.log('SW failed', err));
+        });
+      }
+
+      const amountEl = document.getElementById('amount');
+      const countdownEl = document.getElementById('countdown');
+      const statusEl = document.getElementById('status');
+      const stop1 = document.getElementById('stop1');
+      const startTimeInput = document.getElementById('startTime');
+      const endTimeInput = document.getElementById('endTime');
+      const dailySalaryInput = document.getElementById('dailySalary');
+
+      let currentHue = 150;
+      let targetHue = 150;
+
+      function formatTime(ms) {
+        if (ms <= 0) return '00:00:00';
+        const totalSeconds = Math.floor(ms / 1000);
+        const h = Math.floor(totalSeconds / 3600)
+          .toString()
+          .padStart(2, '0');
+        const m = Math.floor((totalSeconds % 3600) / 60)
+          .toString()
+          .padStart(2, '0');
+        const s = (totalSeconds % 60).toString().padStart(2, '0');
+        return `${h}:${m}:${s}`;
+      }
+
+      function update() {
+        const now = new Date();
+        const dateStr = `${now.getFullYear()}-${now.getMonth() + 1}-${now.getDate()}`;
+        const start = new Date(`${dateStr} ${startTimeInput.value}`);
+        const end = new Date(`${dateStr} ${endTimeInput.value}`);
+        const dailySalary = parseFloat(dailySalaryInput.value) || 0;
+
+        if (now < start) {
+          statusEl.innerText = 'BEFORE WORKING HOURS';
+          amountEl.innerText = '0.000';
+          countdownEl.innerText = 'WAITING...';
+          targetHue = 150;
+        } else if (now >= end) {
+          statusEl.innerText = 'OFF WORK - ENJOY!';
+          amountEl.innerText = dailySalary.toFixed(3);
+          countdownEl.innerText = '00:00:00';
+          targetHue = 30;
+        } else {
+          statusEl.innerText = 'ON DUTY';
+          const totalDuration = end - start;
+          const ratio = (now - start) / totalDuration;
+          amountEl.innerText = (ratio * dailySalary).toFixed(3);
+          countdownEl.innerText = formatTime(end - now);
+          targetHue = 150 - ratio * 120;
+        }
+
+        currentHue += (targetHue - currentHue) * 0.05;
+        stop1.style.stopColor = `hsl(${currentHue}, 100%, 50%)`;
+        requestAnimationFrame(update);
+      }
+      requestAnimationFrame(update);
+    </script>
+  </body>
+</html>
