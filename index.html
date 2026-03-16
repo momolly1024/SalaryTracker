@@ -119,7 +119,6 @@
       input[type='time'] {
         cursor: pointer;
       }
-
       input[type='time']::-webkit-calendar-picker-indicator {
         cursor: pointer;
       }
@@ -193,9 +192,101 @@
         margin-bottom: 10px;
         letter-spacing: 2px;
       }
+
+      /* ── FIREWORKS CANVAS ── */
+      #fireworks-canvas {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+        z-index: 9999;
+        display: none;
+        opacity: 1;
+        transition: opacity 2s ease;
+      }
+
+      /* ── FREEDOM BANNER (small card) ── */
+      #freedom-banner {
+        display: none;
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        z-index: 9998;
+        background: rgba(10, 10, 25, 0.88);
+        border: 1px solid rgba(255, 215, 0, 0.25);
+        border-radius: 16px;
+        padding: 2rem 3rem;
+        pointer-events: none;
+        text-align: center;
+        opacity: 1;
+        transition: opacity 2s ease;
+      }
+
+      #freedom-banner.visible {
+        display: block;
+      }
+
+      #freedom-banner .banner-text {
+        font-size: clamp(2.5rem, 10vw, 6rem);
+        font-weight: 900;
+        letter-spacing: 6px;
+        background: linear-gradient(135deg, #ffd700, #ff6b6b, #00d1a0, #a78bfa);
+        background-size: 300% 300%;
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        animation: gradientShift 1.5s ease infinite;
+        filter: drop-shadow(0 0 40px rgba(255, 215, 0, 0.5));
+        line-height: 1.1;
+      }
+
+      #freedom-banner .banner-sub {
+        font-size: clamp(0.75rem, 2.5vw, 1.1rem);
+        letter-spacing: 10px;
+        color: #ffd700;
+        margin-top: 16px;
+        opacity: 0.85;
+      }
+
+      #freedom-banner .banner-emoji {
+        font-size: clamp(2rem, 6vw, 4rem);
+        margin-bottom: 12px;
+        animation: pulse 1s ease infinite alternate;
+      }
+
+      @keyframes pulse {
+        from {
+          transform: scale(1);
+        }
+        to {
+          transform: scale(1.15);
+        }
+      }
+
+      @keyframes gradientShift {
+        0% {
+          background-position: 0% 50%;
+        }
+        50% {
+          background-position: 100% 50%;
+        }
+        100% {
+          background-position: 0% 50%;
+        }
+      }
     </style>
   </head>
   <body>
+    <canvas id="fireworks-canvas"></canvas>
+    <div id="freedom-banner">
+      <div class="banner-emoji">🎉</div>
+      <div class="banner-text">Bye</div>
+      <div class="banner-sub">WORK DAY COMPLETE</div>
+    </div>
+
     <div class="container">
       <div class="svg-container">
         <svg
@@ -273,26 +364,205 @@
       const startTimeInput = document.getElementById('startTime');
       const endTimeInput = document.getElementById('endTime');
       const dailySalaryInput = document.getElementById('dailySalary');
+      const canvas = document.getElementById('fireworks-canvas');
+      const ctx = canvas.getContext('2d');
+      const banner = document.getElementById('freedom-banner');
 
-      let currentHue = 170;
-      let targetHue = 170;
+      let currentHue = 170,
+        targetHue = 170;
+      let wasOffWork = false;
+      let fireworksActive = false;
+      let fireworksEndTime = 0;
+      let particles = [];
+      let fireworksRAF = null;
+      let isFadingOut = false;
+
+      // ── FIREWORKS ENGINE ──────────────────────────────────────────────────
+
+      class Particle {
+        constructor(x, y, isRocket) {
+          this.x = x;
+          this.y = y;
+          this.isRocket = isRocket;
+
+          if (isRocket) {
+            this.vx = (Math.random() - 0.5) * 3;
+            this.vy = -(Math.random() * 6 + 8);
+            this.color = `hsl(${Math.random() * 360},90%,65%)`;
+            this.size = 3;
+            this.life = 1;
+            this.decay = 0;
+            this.exploded = false;
+            this.trail = [];
+          } else {
+            const angle = Math.random() * Math.PI * 2;
+            const speed = Math.random() * 6 + 2;
+            this.vx = Math.cos(angle) * speed;
+            this.vy = Math.sin(angle) * speed;
+            this.color = `hsl(${Math.random() * 360},90%,65%)`;
+            this.size = Math.random() * 3 + 1;
+            this.life = 1;
+            this.decay = Math.random() * 0.018 + 0.012;
+            this.gravity = 0.12;
+          }
+        }
+
+        update() {
+          if (this.isRocket) {
+            this.trail.push({ x: this.x, y: this.y });
+            if (this.trail.length > 12) this.trail.shift();
+            this.x += this.vx;
+            this.y += this.vy;
+            this.vy += 0.15;
+            if (this.vy >= 0 && !this.exploded) {
+              this.exploded = true;
+              return true;
+            }
+          } else {
+            this.x += this.vx;
+            this.y += this.vy;
+            this.vy += this.gravity;
+            this.vx *= 0.97;
+            this.life -= this.decay;
+          }
+          return false;
+        }
+
+        draw(ctx) {
+          if (this.isRocket) {
+            for (let i = 0; i < this.trail.length; i++) {
+              const alpha = (i / this.trail.length) * 0.4;
+              ctx.beginPath();
+              ctx.arc(this.trail[i].x, this.trail[i].y, 2, 0, Math.PI * 2);
+              ctx.fillStyle = `rgba(255,200,100,${alpha})`;
+              ctx.fill();
+            }
+            ctx.beginPath();
+            ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+            ctx.fillStyle = '#fff';
+            ctx.fill();
+          } else {
+            ctx.globalAlpha = Math.max(0, this.life);
+            ctx.beginPath();
+            ctx.arc(this.x, this.y, this.size * this.life, 0, Math.PI * 2);
+            ctx.fillStyle = this.color;
+            ctx.fill();
+            ctx.globalAlpha = 1;
+          }
+        }
+      }
+
+      function explode(x, y) {
+        const count = Math.floor(Math.random() * 60 + 80);
+        for (let i = 0; i < count; i++)
+          particles.push(new Particle(x, y, false));
+        for (let i = 0; i < 20; i++) {
+          const p = new Particle(x, y, false);
+          const angle = (i / 20) * Math.PI * 2;
+          p.vx = Math.cos(angle) * 4;
+          p.vy = Math.sin(angle) * 4;
+          p.size = 2;
+          p.decay = 0.025;
+          p.color = '#fff';
+          particles.push(p);
+        }
+      }
+
+      function launchRocket() {
+        particles.push(
+          new Particle(Math.random() * canvas.width, canvas.height, true),
+        );
+      }
+
+      let lastLaunch = 0;
+
+      function drawFireworks(timestamp) {
+        if (!fireworksActive && !isFadingOut) return;
+
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        ctx.fillStyle = 'rgba(26,26,46,0.18)';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        // Only launch new rockets before the fade window
+        if (!isFadingOut && timestamp - lastLaunch > 350) {
+          const burst = Math.floor(Math.random() * 2) + 1;
+          for (let b = 0; b < burst; b++) launchRocket();
+          lastLaunch = timestamp;
+        }
+
+        const toRemove = [];
+        for (let i = particles.length - 1; i >= 0; i--) {
+          const p = particles[i];
+          const shouldExplode = p.update();
+          if (shouldExplode) {
+            explode(p.x, p.y);
+            toRemove.push(i);
+          } else if (!p.isRocket && p.life <= 0) {
+            toRemove.push(i);
+          } else {
+            p.draw(ctx);
+          }
+        }
+        toRemove.forEach((i) => particles.splice(i, 1));
+
+        // Trigger the CSS fade once time is up
+        if (!isFadingOut && fireworksEndTime - Date.now() <= 0) {
+          isFadingOut = true;
+          fireworksActive = false;
+          canvas.style.opacity = '0';
+          banner.style.opacity = '0';
+
+          // After CSS transition finishes, fully clean up
+          setTimeout(() => {
+            canvas.style.display = 'none';
+            canvas.style.opacity = '1';
+            banner.classList.remove('visible');
+            banner.style.opacity = '1';
+            particles = [];
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            if (fireworksRAF) {
+              cancelAnimationFrame(fireworksRAF);
+              fireworksRAF = null;
+            }
+            isFadingOut = false;
+          }, 2100); // slightly longer than the 2s CSS transition
+        }
+
+        // Keep the loop alive during fade so existing particles drift out
+        fireworksRAF = requestAnimationFrame(drawFireworks);
+      }
+
+      function startFireworks() {
+        if (fireworksActive || isFadingOut) return;
+        fireworksActive = true;
+        isFadingOut = false;
+        fireworksEndTime = Date.now() + 10000;
+        particles = [];
+        canvas.style.opacity = '1';
+        canvas.style.display = 'block';
+        banner.style.opacity = '1';
+        banner.classList.add('visible');
+        lastLaunch = 0;
+        fireworksRAF = requestAnimationFrame(drawFireworks);
+      }
+
+      // ── DAILY SALARY SPINNERS ─────────────────────────────────────────────
 
       dailySalaryInput.addEventListener('mousedown', function (e) {
         const rect = this.getBoundingClientRect();
         const x = e.clientX - rect.left;
         const y = e.clientY - rect.top;
-
         if (x > rect.width - 35) {
           e.preventDefault();
           let val = parseFloat(this.value) || 0;
-          if (y < rect.height / 2) {
-            this.value = val + 1;
-          } else {
-            this.value = val - 1;
-          }
+          this.value = y < rect.height / 2 ? val + 1 : val - 1;
           this.dispatchEvent(new Event('input'));
         }
       });
+
+      // ── MAIN UPDATE LOOP ──────────────────────────────────────────────────
 
       function formatTimeWithMs(ms) {
         if (ms <= 0) return '00:00:00:00';
@@ -316,32 +586,40 @@
         const dateStr = `${now.getFullYear()}-${now.getMonth() + 1}-${now.getDate()}`;
         const start = new Date(`${dateStr} ${startTimeInput.value}`);
         const end = new Date(`${dateStr} ${endTimeInput.value}`);
-        const dailySalary = parseFloat(dailySalaryInput.value) || 0;
+        const daily = parseFloat(dailySalaryInput.value) || 0;
+        const isOff = now >= end;
 
         if (now < start) {
           statusEl.innerText = 'BEFORE WORKING HOURS';
           amountEl.innerText = '0.000';
           countdownEl.innerText = 'WAITING...';
           targetHue = 170;
-        } else if (now >= end) {
+          wasOffWork = false;
+        } else if (isOff) {
           statusEl.innerText = 'OFF WORK - ENJOY!';
-          amountEl.innerText = dailySalary.toFixed(3);
+          amountEl.innerText = daily.toFixed(3);
           countdownEl.innerText = '00:00:00:00';
           targetHue = 25;
+          if (!wasOffWork) {
+            wasOffWork = true;
+            startFireworks();
+          }
         } else {
           statusEl.innerText = 'ON DUTY';
-          const totalDuration = end - start;
+          const total = end - start;
           const remaining = end - now;
-          const ratio = (now - start) / totalDuration;
-          amountEl.innerText = (ratio * dailySalary).toFixed(3);
+          const ratio = (now - start) / total;
+          amountEl.innerText = (ratio * daily).toFixed(3);
           countdownEl.innerText = formatTimeWithMs(remaining);
           targetHue = 170 - ratio * 145;
+          wasOffWork = false;
         }
 
         currentHue += (targetHue - currentHue) * 0.02;
         stop1.style.stopColor = `hsl(${currentHue}, 60%, 40%)`;
         requestAnimationFrame(update);
       }
+
       requestAnimationFrame(update);
     </script>
   </body>
