@@ -1,4 +1,7 @@
-# 💸 Salary Tracker Pro: The "Freedom Countdown" Edition
+
+# https://momolly1024.github.io/SalaryTracker/
+
+# 💸 Salary Tracker : The "Freedom Countdown" Edition
 
 Welcome to the only app that makes watching paint dry look productive by comparison. This is a high-precision, low-stress financial instrument designed to answer the eternal question: _"Have I earned enough for a fancy coffee yet?"_
 
